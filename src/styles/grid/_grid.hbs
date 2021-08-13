@@ -1,0 +1,19 @@
+<div class="nsw-grid">
+{{#if simple}}
+  {{#each cols}}
+  <div class="nsw-col">
+    <!-- START: Column content -->
+    <div class="nsw-docs__box"></div>
+    <!-- END: Column content -->
+  </div>
+  {{/each}}
+{{else}}
+  {{#each cols}}
+  <div class="nsw-col {{this}}">
+    <!-- START: Column content -->
+    <div class="nsw-docs__box"></div>
+    <!-- END: Column content -->
+  </div>
+  {{/each}}
+{{/if}}
+</div>

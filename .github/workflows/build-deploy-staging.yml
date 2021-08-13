@@ -1,0 +1,57 @@
+name: build-deploy-staging
+on:
+  push:
+    branches:
+      - 'develop'
+      - '!master'
+  pull_request:
+    types: [assigned, opened, synchronize, reopened]
+jobs:
+  build-staging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 8
+      - run: npm install
+      - run: npm run starterkit:build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: |
+            dist
+
+  test-staging:
+    needs: build-staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - uses: actions/download-artifact@v2
+        with:
+          name: dist
+          path: |
+            dist
+      - run: |
+          npm install -g pa11y-ci
+          pa11y-ci ./dist/{components,styles,templates}/**/*.html
+      - name: Visual test
+        uses: percy/snapshot-action@v0.1.2
+        with:
+          build-directory: "dist"
+        env:
+          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
+  deploy-staging:
+    needs: test-staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - run: npm install -g surge
+      - uses: actions/download-artifact@v2
+        with:
+          name: dist
+          path: |
+            dist
+      - run: surge ./dist ${{ secrets.SURGE_DOMAIN_STAGING }} --token ${{ secrets.SURGE_TOKEN }}

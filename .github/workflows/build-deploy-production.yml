@@ -1,0 +1,21 @@
+name: build-deploy-production
+on:
+  push:
+    branches:
+      - main
+      - master
+jobs:
+  build-deploy-production:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 8
+      - run: npm install
+      - run: npm run starterkit:build
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
